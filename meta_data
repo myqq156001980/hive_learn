@@ -158,9 +158,14 @@ COLUMNS_V2
   CONSTRAINT `COLUMNS_V2_FK1` FOREIGN KEY (`CD_ID`) REFERENCES `CDS` (`CD_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 |
 
-
-
-
+# change column a's name to a1.
+当使用ALTER TABLE test_change CHANGE a a1 INT; 改变column的类型时，改变后，hive的meta data中的 columns_v2表并不会改变，
+在有新的分区添加时，会重新添加一个CD_ID保存更改后的表结构信息。这时候使用普通查询是没问题的，但是如果使用select count(*) from tablename.进行查询
+时就会报错。
+There is a mismatch between the table and partition schemas. 
+The column 'log_time' in table 'aflt.test_log' is declared as type 'string', 
+but partition 'dt=2016-12-15' declared column 'log_time' as type 'float'.
+这时是能修改元数据中SDS中的CD_ID指向新的CD_ID即可，或者删除分区重新恢复分区数据。
 SELECT t.TBL_ID,
        t.TBL_NAME,
        p.PART_NAME,
